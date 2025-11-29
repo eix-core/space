@@ -1,0 +1,23 @@
+{
+	"type"              : "cli",
+	"template"          : "clean",
+	"pm"                : "bun",
+	"repo"              : {
+		"org"           : "solution-lib",
+		"name"          : "space",
+		"version"       : "0.0.1",
+		"desc"          : "Creates and manages the spaces",
+		"kw"            : ["solution", "space", "framework"],
+		"license"       : "MIT",
+		"issues"        : "https://github.com/solution-lib/space/issues",
+		"homepage"      : "https://github.com/solution-lib/space#readme",
+		"git_url"       : "git+https://github.com/solution-lib/space.git"
+	},
+	"author"            : {
+		"id"            : "maysara-elshewehy",
+		"name"          : "Maysara",
+		"email"         : "maysara.elshewehy@gmail.com",
+		"url"           : "https://github.com/maysara-elshewehy"
+	},
+	"createdAt"         : "2025-11-29T01:22:48.497Z"
+}

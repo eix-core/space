@@ -1,0 +1,371 @@
+// src/app/mod/packageManager.ts
+//
+// Developed with ❤️ by Maysara.
+// Simplified: Uses Bun for all operations, npm only for publishing
+
+
+
+// ╔════════════════════════════════════════ PACK ════════════════════════════════════════╗
+
+    import { JsonFormatter, PACKAGE_JSON_KEY_ORDER } from './jsonFormatter';
+    import * as path from 'path';
+    import * as fs from 'fs';
+
+// ╚══════════════════════════════════════════════════════════════════════════════════════╝
+
+
+
+// ╔════════════════════════════════════════ CORE ════════════════════════════════════════╗
+
+    export class PackageManagerWrapper {
+
+        // ┌──────────────────────────────── INIT ──────────────────────────────┐
+
+            // Always use bun
+            private readonly pm = 'bun';
+
+            // Default scripts
+            private readonly DEFAULT_SCRIPTS = {
+                build: 'tsup',
+                test: 'test',
+            };
+
+            constructor() {
+                // No need for pm parameter anymore
+            }
+
+        // └────────────────────────────────────────────────────────────────────┘
+
+
+        // ┌──────────────────────────────── MAIN ──────────────────────────────┐
+
+            // Install packages
+            install(packages?: string[], options?: { dev?: boolean; global?: boolean }): void {
+                const args = ['install'];
+
+                if (packages && packages.length > 0) {
+                    args.push(...packages);
+                }
+
+                if (options?.dev) {
+                    args.push('--dev');
+                }
+
+                if (options?.global) {
+                    args.push('--global');
+                }
+
+                console.log(`📦 Installing${packages ? ` ${packages.join(', ')}` : ' dependencies'}...`);
+                this.execute(args);
+
+                // Format package.json after install
+                this.format();
+            }
+
+            /**
+             * Remove packages
+             */
+            remove(packages: string[], options?: { global?: boolean }): void {
+                const args = ['remove'];
+                args.push(...packages);
+
+                if (options?.global) {
+                    args.push('--global');
+                }
+
+                console.log(`🗑️  Removing ${packages.join(', ')}...`);
+                this.execute(args);
+
+                // Format package.json after remove
+                this.format();
+            }
+
+            /**
+             * Link package globally
+             */
+            link(): void {
+                console.log('🔗 Linking package globally...');
+                this.execute(['link']);
+            }
+
+            /**
+             * Unlink package globally
+             */
+            unlink(): void {
+                console.log('🔓 Unlinking package...');
+                this.execute(['unlink']);
+            }
+
+            /**
+             * Run a script from package.json (with fallback to default)
+             */
+            run(script: string, args?: string[]): void {
+                const scriptCommand = this.getScriptCommand(script);
+
+                if (!scriptCommand) {
+                    console.error(`✘ Script "${script}" not found in package.json and no default available`);
+                    process.exit(1);
+                }
+
+                // If using default script, run it directly
+                if (this.isUsingDefaultScript(script)) {
+                    const commandParts = scriptCommand.split(' ');
+                    const command = [...commandParts];
+
+                    if (args && args.length > 0) {
+                        command.push(...args);
+                    }
+
+                    this.execute(command);
+                } else {
+                    // Use bun run for package.json scripts
+                    const command = ['run', script];
+                    if (args && args.length > 0) {
+                        command.push('--', ...args);
+                    }
+                    this.execute(command);
+                }
+            }
+
+            /**
+             * Run a script from package.json silently (with fallback to default)
+             */
+            runSilent(script: string, args?: string[]): void {
+                const scriptCommand = this.getScriptCommand(script);
+
+                if (!scriptCommand) {
+                    throw new Error(`Script "${script}" not found in package.json and no default available`);
+                }
+
+                // If using default script, run it directly
+                if (this.isUsingDefaultScript(script)) {
+                    const commandParts = scriptCommand.split(' ');
+                    const command = [...commandParts];
+
+                    if (args && args.length > 0) {
+                        command.push(...args);
+                    }
+
+                    this.executeSilent(command);
+                } else {
+                    // Use bun run for package.json scripts
+                    const command = ['run', script];
+                    if (args && args.length > 0) {
+                        command.push('--', ...args);
+                    }
+                    this.executeSilent(command);
+                }
+            }
+
+            /**
+             * Update packages
+             */
+            update(packages?: string[]): void {
+                console.log(`🔄 Updating${packages ? ` ${packages.join(', ')}` : ' all packages'}...`);
+
+                const args = ['update'];
+                if (packages && packages.length > 0) {
+                    args.push(...packages);
+                }
+                this.execute(args);
+
+                // Format package.json after update
+                this.format();
+            }
+
+            /**
+             * List installed packages
+             */
+            list(options?: { global?: boolean }): void {
+                const args = ['pm', 'ls'];
+                if (options?.global) {
+                    args.push('--global');
+                }
+                this.execute(args);
+            }
+
+            /**
+             * Initialize a new package.json
+             */
+            init(): void {
+                console.log('📝 Initializing package.json...');
+                this.execute(['init', '-y']);
+
+                // Format package.json after init
+                this.format();
+            }
+
+            /**
+             * Publish package (uses bun for publishing - simpler and more reliable)
+             */
+            publish(options?: { tag?: string; access?: 'public' | 'restricted' }, loader?: any): void {
+                // Publish with bun (more reliable than npm)
+                const args = ['publish'];
+                if (options?.tag) {
+                    args.push('--tag', options.tag);
+                }
+                // Always set access flag for scoped packages, default to public
+                const access = options?.access || 'public';
+                args.push('--access', access);
+
+                const publishProc = Bun.spawnSync(['bun', ...args], {
+                    stdout: 'pipe',
+                    stderr: 'pipe'
+                });
+
+                if (publishProc.exitCode === 0) {
+                    // Extract package name and version from output
+                    const stdout = new TextDecoder().decode(publishProc.stdout);
+                    const versionMatch = stdout.match(/\+ (.+@[\d.]+)/);
+
+                    if (loader) {
+                        if (versionMatch) {
+                            loader.stop(`✔ Published ${versionMatch[1]} successfully!`);
+                        } else {
+                            loader.stop('✔ Published successfully!');
+                        }
+                    } else {
+                        if (versionMatch) {
+                            console.log(`✔ Published ${versionMatch[1]} successfully!`);
+                        } else {
+                            console.log('✔ Published successfully!');
+                        }
+                    }
+                } else {
+                    const stderr = new TextDecoder().decode(publishProc.stderr);
+                    if (loader) {
+                        loader.stopWithError('Publish failed!');
+                    } else {
+                        console.error('Publish failed!');
+                    }
+                    if (stderr) {
+                        console.error(stderr);
+                    }
+                    process.exit(1);
+                }
+            }
+
+            /**
+             * Execute bun command
+             */
+            execute(args: string[]): void {
+                const proc = Bun.spawnSync(['bun', ...args], {
+                    stdout: 'inherit',
+                    stderr: 'inherit'
+                });
+
+                if (proc.exitCode !== 0) {
+                    console.error(`✘ Command failed: bun ${args.join(' ')}`);
+                    process.exit(1);
+                }
+            }
+
+            /**
+             * Execute bun command silently
+             */
+            executeSilent(args: string[]): void {
+                const proc = Bun.spawnSync(['bun', ...args], {
+                    stdout: 'pipe',
+                    stderr: 'pipe'
+                });
+
+                if (proc.exitCode !== 0) {
+                    // Only show errors if command failed
+                    const stderr = new TextDecoder().decode(proc.stderr);
+                    console.error(`✘ Command failed: bun ${args.join(' ')}`);
+                    if (stderr) {
+                        console.error(stderr);
+                    }
+                    process.exit(1);
+                }
+            }
+
+            /**
+             * Get package manager name
+             */
+            getName(): string {
+                return 'bun';
+            }
+
+            /**
+             * Get package manager emoji
+             */
+            getEmoji(): string {
+                return '🥟';
+            }
+
+        // └────────────────────────────────────────────────────────────────────┘
+
+
+        // ┌──────────────────────────────── HELP ──────────────────────────────┐
+
+            /**
+             * Format package.json after operations
+             */
+            private format(): void {
+                try {
+                    const pkgPath = path.join(process.cwd(), 'package.json');
+                    if (fs.existsSync(pkgPath)) {
+                        JsonFormatter.formatFile(pkgPath, { keyOrder: PACKAGE_JSON_KEY_ORDER });
+                    }
+                } catch (error) {
+                    // Silently ignore formatting errors
+                }
+            }
+
+            /**
+             * Get script command (from package.json or default)
+             */
+            private getScriptCommand(script: string): string | null {
+                const pkgPath = path.join(process.cwd(), 'package.json');
+
+                // Try to read package.json
+                if (fs.existsSync(pkgPath)) {
+                    try {
+                        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+
+                        // Check if script exists in package.json
+                        if (pkg.scripts && pkg.scripts[script]) {
+                            return pkg.scripts[script];
+                        }
+                    } catch (error) {
+                        // If can't read package.json, fall through to defaults
+                    }
+                }
+
+                // Return default script if available
+                if (script in this.DEFAULT_SCRIPTS) {
+                    return this.DEFAULT_SCRIPTS[script as keyof typeof this.DEFAULT_SCRIPTS];
+                }
+
+                return null;
+            }
+
+            /**
+             * Check if using default script (not from package.json)
+             */
+            private isUsingDefaultScript(script: string): boolean {
+                const pkgPath = path.join(process.cwd(), 'package.json');
+
+                if (fs.existsSync(pkgPath)) {
+                    try {
+                        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+
+                        // If script exists in package.json, not using default
+                        if (pkg.scripts && pkg.scripts[script]) {
+                            return false;
+                        }
+                    } catch (error) {
+                        // If can't read, assume using default
+                    }
+                }
+
+                // Using default if script is in DEFAULT_SCRIPTS
+                return script in this.DEFAULT_SCRIPTS;
+            }
+
+        // └────────────────────────────────────────────────────────────────────┘
+
+    }
+
+// ╚══════════════════════════════════════════════════════════════════════════════════════╝
