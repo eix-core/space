@@ -355,9 +355,9 @@
 
             static defaultConfig(): AppConfig {
                 return {
-                    name: 'Space',
-                    version: '0.0.1',
-                    desc: 'Build flexible spaces for any platform',
+                    name    : 'Space',
+                    version : '0.0.1',
+                    desc    : 'Build flexible spaces for any platform',
                 };
             }
 

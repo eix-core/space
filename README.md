@@ -8,7 +8,7 @@
 </div>
 
 <div align="center">
-    <img src="https://img.shields.io/badge/v-0.0.1-black"/>
+    <img src="https://img.shields.io/badge/v-0.0.2-black"/>
     <a href="https://github.com/maysara-elshewehy">
     </a>
     <a href="https://github.com/solution-lib"><img src="https://img.shields.io/badge/🔥-@solution--lib-black"/></a>
@@ -29,8 +29,7 @@
 
     ```bash
     # install via bun or npm
-    bun install @solution-lib/space
-    bun link @sulotion-lib/space
+    bun install -g @solution-lib/space
 
     # Now use 'space' anywhere
     space --help

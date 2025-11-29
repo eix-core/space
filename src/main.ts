@@ -18,9 +18,9 @@
 // ╔════════════════════════════════════════ INIT ════════════════════════════════════════╗
 
     const app = App.create({
-        name: 'Space',
-        version: '0.0.1',
-        desc: 'Build flexible spaces for any platform',
+        name        : 'Space',
+        version     : '0.0.2',
+        desc        : 'Build flexible spaces for any platform',
     });
 
     app.run();
