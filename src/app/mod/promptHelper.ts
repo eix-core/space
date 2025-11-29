@@ -99,17 +99,17 @@
                         message: 'type:',
                         choices: [
                             {
-                                name: `📚 Library - TypeScript library for npm${!libReady ? ' (Coming Soon)' : ''}`,
+                                name: `→ Library    - TypeScript library for npm${!libReady ? ' (Coming Soon)' : ''}`,
                                 value: 'lib',
                                 disabled: !libReady ? 'No templates ready yet' : false
                             },
                             {
-                                name: `⚡ CLI - Command-line tool${!cliReady ? ' (Coming Soon)' : ''}`,
+                                name: `→ CLI        - Command-line tool${!cliReady ? ' (Coming Soon)' : ''}`,
                                 value: 'cli',
                                 disabled: !cliReady ? 'No templates ready yet' : false
                             },
                             {
-                                name: `🖥️  Server - Backend server application${!serverReady ? ' (Coming Soon)' : ''}`,
+                                name: `→ Server     - Backend server application${!serverReady ? ' (Coming Soon)' : ''}`,
                                 value: 'server',
                                 disabled: !serverReady ? 'No templates ready yet' : false
                             }

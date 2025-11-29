@@ -55,7 +55,7 @@
                     args.push('--global');
                 }
 
-                console.log(`📦 Installing${packages ? ` ${packages.join(', ')}` : ' dependencies'}...`);
+                console.log(`→ Installing${packages ? ` ${packages.join(', ')}` : ' dependencies'}...`);
                 this.execute(args);
 
                 // Format package.json after install
@@ -73,7 +73,7 @@
                     args.push('--global');
                 }
 
-                console.log(`🗑️  Removing ${packages.join(', ')}...`);
+                console.log(`🗑️ Removing ${packages.join(', ')}...`);
                 this.execute(args);
 
                 // Format package.json after remove
