@@ -80,9 +80,9 @@
 
 - ## Space Types and Examples
 
-    > _**[cli](https://github.com/solution-dist/cli)**_
-
     > _**[lib](https://github.com/solution-dist/lib)**_
+
+    > _**[cli](https://github.com/solution-dist/cli)**_
 
     > _**[server](https://github.com/solution-dist/server)**_
 
