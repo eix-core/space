@@ -36,11 +36,11 @@
     space init
 
     # Or with options
-    space init my-lib -t lib --pm bun --desc "My library"
+    space init my-lib -t lib
 
     # Navigate and setup
     cd my-lib
-    space i         # or `space install`
+    space install
     space build
     ```
 
