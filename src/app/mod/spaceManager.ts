@@ -183,10 +183,7 @@
                     ? `https://github.com/${config.author.id}`
                     : (config.author.url || '');
 
-                // Prepare keywords as JSON array string
-                const keywordsJson = config.repo.kw && config.repo.kw.length > 0
-                    ? JSON.stringify(config.repo.kw)
-                    : '[]';
+                // ✅ REMOVED: keywordsJson preparation - we'll handle keywords in package.json only
 
                 // Recursively find all files
                 const allFiles = this.getAllFiles(spacePath);
@@ -219,8 +216,9 @@
                                 .replace(/\{\{description\}\}/g,    config.repo.desc || `A ${config.type} space`)
                                 .replace(/\{\{version\}\}/g,        config.repo.version)
                                 .replace(/\{\{license\}\}/g,        config.repo.license || 'MIT')
-                                .replace(/\{\{kw\}\}/g,             keywordsJson)
-                                .replace(/\{\{keywords\}\}/g,       keywordsJson)
+                                // ✅ REMOVED: keyword replacements here - handled in package.json section
+                                // .replace(/\{\{kw\}\}/g,             keywordsJson)
+                                // .replace(/\{\{keywords\}\}/g,       keywordsJson)
 
                                 // URLs
                                 .replace(/\{\{url\}\}/g,            gitUrl)
@@ -256,7 +254,7 @@
                             packageJson.description = config.repo.desc || `A ${config.type} space`;
                             packageJson.license = config.repo.license || 'MIT';
 
-                            // Set keywords as array
+                            // ✅ Set keywords as array (this is correct and won't cause double-stringification)
                             if (config.repo.kw && config.repo.kw.length > 0) {
                                 packageJson.keywords = config.repo.kw;
                             } else {

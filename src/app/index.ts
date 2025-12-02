@@ -297,6 +297,65 @@
                         }
                     ],
 
+                    options: [
+                        {
+                            name        : 'coverage',
+                            flag        : '--coverage',
+                            type        : 'boolean',
+                            required    : false,
+                            description : 'Generate code coverage report'
+                        },
+                        {
+                            name        : 'watch',
+                            flag        : '--watch',
+                            type        : 'boolean',
+                            required    : false,
+                            description : 'Run tests in watch mode'
+                        },
+                        {
+                            name        : 'bail',
+                            flag        : '--bail',
+                            type        : 'boolean',
+                            required    : false,
+                            description : 'Exit on first test failure'
+                        },
+                        {
+                            name        : 'timeout',
+                            flag        : '--timeout',
+                            type        : 'string',
+                            required    : false,
+                            description : 'Set test timeout in milliseconds'
+                        },
+                        {
+                            name        : 'rerun-each',
+                            flag        : '--rerun-each',
+                            type        : 'string',
+                            required    : false,
+                            description : 'Re-run each test N times'
+                        },
+                        {
+                            name        : 'concurrent',
+                            flag        : '--concurrent',
+                            type        : 'boolean',
+                            required    : false,
+                            description : 'Run tests concurrently'
+                        },
+                        {
+                            name        : 'coverage-reporter',
+                            flag        : '--coverage-reporter',
+                            type        : 'string',
+                            required    : false,
+                            description : 'Coverage reporter format (text, lcov, etc.)'
+                        },
+                        {
+                            name        : 'test-name-pattern',
+                            flag        : '-t',
+                            type        : 'string',
+                            required    : false,
+                            description : 'Filter tests by name pattern'
+                        }
+                    ],
+
                     action: (params: any) => this.runTests(params)
                 })
 
@@ -916,10 +975,58 @@
                 if (!this.ensureSpace()) return;
                 if (!this.pm) this.initPackageManager();
 
-                const testPath = params?.args?.path || null;
+                // Build args array for bun test
+                const args: string[] = [];
 
+                // Add test path if specified
+                const testPath = params?.args?.path;
                 if (testPath) {
-                    this.pm!.run('test', [testPath]);
+                    args.push(testPath);
+                }
+
+                // Add coverage flag
+                if (params?.options?.coverage) {
+                    args.push('--coverage');
+                }
+
+                // Add coverage reporter
+                if (params?.options?.['coverage-reporter']) {
+                    args.push('--coverage-reporter', params.options['coverage-reporter']);
+                }
+
+                // Add watch flag
+                if (params?.options?.watch) {
+                    args.push('--watch');
+                }
+
+                // Add bail flag
+                if (params?.options?.bail) {
+                    args.push('--bail');
+                }
+
+                // Add timeout
+                if (params?.options?.timeout) {
+                    args.push('--timeout', params.options.timeout);
+                }
+
+                // Add rerun-each
+                if (params?.options?.['rerun-each']) {
+                    args.push('--rerun-each', params.options['rerun-each']);
+                }
+
+                // Add concurrent
+                if (params?.options?.concurrent) {
+                    args.push('--concurrent');
+                }
+
+                // Add test name pattern
+                if (params?.options?.['test-name-pattern']) {
+                    args.push('-t', params.options['test-name-pattern']);
+                }
+
+                // Run tests with args
+                if (args.length > 0) {
+                    this.pm!.run('test', args);
                 } else {
                     this.pm!.run('test');
                 }
