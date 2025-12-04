@@ -1,8 +1,14 @@
 // src/types.d.ts
 //
-// Template configuration types with 'ready' status
+// Developed with ❤️ by Maysara.
 
-import type { ParsedCommand } from '@je-es/cli';
+
+// ╔════════════════════════════════════════ PACK ════════════════════════════════════════╗
+
+    import type { ParsedCommand } from '@je-es/cli';
+
+// ╚══════════════════════════════════════════════════════════════════════════════════════╝
+
 
 // ╔════════════════════════════════════════ TYPE ════════════════════════════════════════╗
 
