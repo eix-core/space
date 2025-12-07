@@ -500,8 +500,8 @@
                     const { org, name } = this.parsePackageName(answers.name);
 
                     // Validate type
-                    if (!['lib', 'cli', 'server'].includes(answers.type)) {
-                        PromptHelper.showError('Invalid space type. Must be lib, cli or server.');
+                    if (!['lib', 'cli', 'server', 'web'].includes(answers.type)) {
+                        PromptHelper.showError('Invalid space type. Must be lib, cli, server or web.');
                         process.exit(1);
                     }
 

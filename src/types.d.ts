@@ -41,7 +41,7 @@
     export type PackageManager = 'bun' | 'npm';
 
     export interface SpaceConfig {
-        type            : 'lib' | 'cli' | 'server';
+        type            : 'lib' | 'cli' | 'server' | 'web';
         template        : TemplateVariant;
         pm              : 'bun' | 'npm';
 
